@@ -1,12 +1,10 @@
 CREATE TABLE Ingredient (
     ingr_id     NUMBER(5)       PRIMARY KEY,
-    inci_name   VARCHAR2(20)    NOT NULL,
-    ewg_level   number(2),
+    inci_name   VARCHAR2(40)    UNIQUE NOT NULL,
+    ingr_name   VARCHAR2(20)    UNIQUE NOT NULL,
+    ewg_level   VARCHAR2(5),
     allergy     char(1)         NOT NULL,
-
-    CONSTRAINT chk_ingredient_ewg
-        CHECK (ewg_level BETWEEN 1 AND 10)
-
+    
     CONSTRAINT chk_ingredient_allergy
         CHECK (allergy IN ('Y', 'N'))
 );
