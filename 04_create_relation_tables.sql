@@ -31,10 +31,9 @@ CREATE TABLE ProdctCategory_REL (
         REFERENCES ProductCategory (caregory_id)
 );
 
-CREATE TABLE ProductIngredient (
-     product_id      NUMBER(5)      NOT NULL,
+CREATE TABLE ProductIngredient_REL (
+    product_id      NUMBER(5)      NOT NULL,
     ingr_id         NUMBER(5)       NOT NULL,
-    amount_range    VARCHAR2(50),
 
     CONSTRAINT pk_product_ingredient
         PRIMARY KEY (product_id, ingr_id),
@@ -77,15 +76,8 @@ CREATE TABLE Review (
 );
 
 CREATE TABLE ReviewTag (
-    review_id   NUMBER(10)      NOT NULL,
-    tag         VARCHAR2(30)    NOT NULL,
-
-    CONSTRAINT pk_review_tag
-        PRIMARY KEY (review_id, tag),
-
-    CONSTRAINT fk_reviewtag_review
-        FOREIGN KEY (review_id)
-        REFERENCES Review (review_id)
+    tag_id      NUMBER(5)       PRIMARY KEY,
+    tag_name    VARCHAR2(20)    UNIQUE NOT NULL
 );
 
 CREATE TABLE FollowUser (

@@ -8,7 +8,7 @@ CREATE TABLE Product (
     brand_id        NUMBER(5)       NOT NULL,
     product_name    VARCHAR2(50)    NOT NULL,
     category        VARCHAR2(20)    NOT NULL,
-    capacity        number(5),
+    capacity        VARCHAR2(10),
     price           number(10)      NOT NULL,
 
     CONSTRAINT fk_product_brand

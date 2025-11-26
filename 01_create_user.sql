@@ -2,10 +2,9 @@ CREATE TABLE Users (
     user_id     VARCHAR2(10)    PRIMARY KEY,
     password    VARCHAR2(20)    NOT NULL,
     name        VARCHAR2(10)    NOT NULL,
-    nickname    VARCHAR2(10)    NOT NULL,
+    nickname    VARCHAR2(10)    UNIQUE NOT NULL,
     age         NUMBER(3),
 
-    CONSTRAINT uq_users_nickname UNIQUE (nickname),
     CONSTRAINT chk_users_age CHECK (age BETWEEN 0 AND 120)
 );
 
@@ -24,7 +23,7 @@ CREATE TABLE UserProfile (
         CHECK (gender IN ('F', 'M')),
 
     CONSTRAINT chk_user_profile_tone_no
-        CHECK (tone_no BETWEEN 0 AND 30),
+        CHECK (tone_no BETWEEN 5 AND 55),
     
     CONSTRAINT chk_user_profile_personal_color
         CHECK(personal_color IN (

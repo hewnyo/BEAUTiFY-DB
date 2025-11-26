@@ -5,7 +5,7 @@ CREATE INDEX idx_product_category_price
     ON Product(category, price);
 
 CREATE INDEX idx_productingredient_ingr
-    ON ProductIngredient (ingr_id);
+    ON ProductIngredient_REL (ingr_id);
 
 CREATE INDEX idx_reclog_user_date
     ON RecommendationLog (user_id, created_at);
