@@ -39,5 +39,6 @@ CREATE TABLE UserProfile (
 
 CREATE TABLE SkinType (
     skin_type_id NUMBER(5) PRIMARY KEY,
-    type_name    VARCHAR2(20) UNIQUE NOT NULL
+    type_name    VARCHAR2(50) UNIQUE NOT NULL
 );
+

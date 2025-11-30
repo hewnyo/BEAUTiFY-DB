@@ -12,15 +12,15 @@ CREATE TABLE UserSkinType_REL (
 
     CONSTRAINT fk_user_skin_type_master
         FOREIGN KEY (skin_type_id)
-        REFERENCES Users(skin_type_id)
+        REFERENCES SkinType(skin_type_id)
 );
 
 -- 제품 카테고리 관계 테이블
 CREATE TABLE ProdctCategory_REL (
     product_id      NUMBER(5)   NOT NULL,
-    caregory_id     NUMBER(5)   NOT NULL,
+    category_id     NUMBER(5)   NOT NULL,
 
-    CONSTRAINT pk_product_category_rel PRIMARY KEY (product_id, caregory_id),
+    CONSTRAINT pk_product_category_rel PRIMARY KEY (product_id, category_id),
 
     CONSTRAINT fk_product_id
         FOREIGN KEY (product_id)
@@ -28,7 +28,7 @@ CREATE TABLE ProdctCategory_REL (
 
     CONSTRAINT fk_category_id
         FOREIGN KEY (category_id)
-        REFERENCES ProductCategory (caregory_id)
+        REFERENCES ProductCategory (category_id)
 );
 
 CREATE TABLE ProductIngredient_REL (

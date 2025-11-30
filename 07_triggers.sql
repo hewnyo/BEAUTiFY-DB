@@ -5,9 +5,10 @@ DECLARE
     v_cnt   NUMBER;
 BEGIN
     SELECT COUNT(*)
+    INTO v_cnt                       
     FROM Review
-    WHERE user_id=:NEW.user_id
-    AND product_id=:NEW.product_id;
+    WHERE user_id = :NEW.user_id
+      AND product_id = :NEW.product_id;
 
     IF v_cnt > 0 THEN
         RAISE_APPLICATION_ERROR(
