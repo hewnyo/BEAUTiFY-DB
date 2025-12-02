@@ -1,13 +1,13 @@
 CREATE TABLE Ingredient (
     ingr_id     NUMBER(5)       PRIMARY KEY,
-    inci_name   VARCHAR2(50)    UNIQUE NOT NULL,
-    ingr_name   VARCHAR2(50)    UNIQUE NOT NULL,
-    ewg_level   VARCHAR2(5)
+    inci_name   VARCHAR2(200)    UNIQUE NOT NULL,
+    ingr_name   VARCHAR2(200)    UNIQUE NOT NULL,
+    ewg_level   VARCHAR2(10)
 );
 
 CREATE TABLE RiskIngredient (
     ingr_id     number(5)   PRIMARY KEY,
-    inci_name   VARCHAR(50) UNIQUE NOT NULL,
+    inci_name   VARCHAR(200) UNIQUE NOT NULL,
 
     CONSTRAINT fk_RiskIngredient_id
         FOREIGN KEY (ingr_id)
@@ -20,7 +20,7 @@ CREATE TABLE RiskIngredient (
 
 CREATE TABLE AllergyIngredient (
     ingr_id     number(5)   PRIMARY KEY,
-    inci_name   VARCHAR(50) UNIQUE NOT NULL,
+    inci_name   VARCHAR(200) UNIQUE NOT NULL,
     
     CONSTRAINT fk_AllergyIngredient_id
         FOREIGN KEY (ingr_id)

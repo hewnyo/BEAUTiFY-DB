@@ -15,22 +15,6 @@ CREATE TABLE UserSkinType_REL (
         REFERENCES SkinType(skin_type_id)
 );
 
--- 제품 카테고리 관계 테이블
-CREATE TABLE ProdctCategory_REL (
-    product_id      NUMBER(5)   NOT NULL,
-    category_id     NUMBER(5)   NOT NULL,
-
-    CONSTRAINT pk_product_category_rel PRIMARY KEY (product_id, category_id),
-
-    CONSTRAINT fk_product_id
-        FOREIGN KEY (product_id)
-        REFERENCES Product(product_id),
-
-    CONSTRAINT fk_category_id
-        FOREIGN KEY (category_id)
-        REFERENCES ProductCategory (category_id)
-);
-
 CREATE TABLE ProductIngredient_REL (
     product_id      NUMBER(5)      NOT NULL,
     ingr_id         NUMBER(5)       NOT NULL,
@@ -78,6 +62,21 @@ CREATE TABLE Review (
 CREATE TABLE ReviewTag (
     tag_id      NUMBER(5)       PRIMARY KEY,
     tag_name    VARCHAR2(20)    UNIQUE NOT NULL
+);
+
+CREATE TABLE ReviewTag_REL (
+    review_id   NUMBER(10),
+    tag_id      NUMBER(5),
+
+    CONSTRAINT pk_review_tag_rel PRIMARY KEY (review_id, tag_id),
+
+    CONSTRAINT fk_review_id
+        FOREIGN KEY (review_id)
+        REFERENCES Review (review_id),
+    
+    CONSTRAINT fk_tag_id
+        FOREIGN KEY (tag_id)
+        REFERENCES ReviewTag (tag_id)
 );
 
 CREATE TABLE FollowUser (

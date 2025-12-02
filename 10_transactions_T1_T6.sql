@@ -3,21 +3,21 @@
 ------------------------------------------------------------
 DECLARE
     -- 회원 기본 정보
-    v_user_id   Users.user_id%TYPE   := 'user1001';
-    v_password  Users.password%TYPE  := 'pw1234';
-    v_name      Users.name%TYPE      := '장혜원';
-    v_nickname  Users.nickname%TYPE  := '혜원이';
-    v_age       Users.age%TYPE       := 21;
+    v_user_id   Users.user_id%TYPE   := 'ynna';
+    v_password  Users.password%TYPE  := 'ynna321';
+    v_name      Users.name%TYPE      := '김윤나';
+    v_nickname  Users.nickname%TYPE  := '융나';
+    v_age       Users.age%TYPE       := 22;
 
     -- 프로필 정보
     v_gender        UserProfile.gender%TYPE         := 'F';
-    v_tone_no       UserProfile.tone_no%TYPE        := 13;
-    v_personal_color UserProfile.personal_color%TYPE:= 'SPRING_WARM';
+    v_tone_no       UserProfile.tone_no%TYPE        := 22;
+    v_personal_color UserProfile.personal_color%TYPE:= 'AUTUMN_WARM_MUTE';
     v_age_band      UserProfile.age_band%TYPE;
 
     -- 스킨타입 (이미 SkinType 테이블에 존재한다고 가정)
-    v_skin_type_id_main  SkinType.skin_type_id%TYPE := 1;  -- 예: '지성'
-    v_skin_type_id_sub   SkinType.skin_type_id%TYPE := 4;  -- 예: '수부지'
+    v_skin_type_id_1  SkinType.skin_type_id%TYPE := 1;  -- 지성
+    v_skin_type_id_2   SkinType.skin_type_id%TYPE := 5; -- 민감성
 BEGIN
     SAVEPOINT sp_t1;
 
@@ -54,10 +54,10 @@ BEGIN
     -- 3) UserSkinType_REL 등록 (한 사용자가 여러 스킨타입을 가질 수 있음)
     --------------------------------------------------------
     INSERT INTO UserSkinType_REL (user_id, skin_type_id)
-    VALUES (v_user_id, v_skin_type_id_main);
+    VALUES (v_user_id, v_skin_type_id_1);
 
     INSERT INTO UserSkinType_REL (user_id, skin_type_id)
-    VALUES (v_user_id, v_skin_type_id_sub);
+    VALUES (v_user_id, v_skin_type_id_2);
 
     COMMIT;
     DBMS_OUTPUT.PUT_LINE('T1 완료: 회원/프로필/스킨타입 등록');
@@ -67,5 +67,5 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('T1 실패: ' || SQLERRM);
 END;
 /
-SELECT * FROM Users WHERE user_id = 'user1001';
-SELECT * FROM UserProfile WHERE user_id = 'user1001';
+SELECT * FROM Users WHERE user_id = 'ynna';
+SELECT * FROM UserProfile WHERE user_id = 'ynna';
