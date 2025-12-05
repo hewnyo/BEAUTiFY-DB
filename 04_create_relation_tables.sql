@@ -61,7 +61,7 @@ CREATE TABLE Review (
 
 CREATE TABLE ReviewTag (
     tag_id      NUMBER(5)       PRIMARY KEY,
-    tag_name    VARCHAR2(20)    UNIQUE NOT NULL
+    tag_name    VARCHAR2(50)    UNIQUE NOT NULL
 );
 
 CREATE TABLE ReviewTag_REL (

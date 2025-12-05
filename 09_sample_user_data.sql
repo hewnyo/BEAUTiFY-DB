@@ -1,37 +1,290 @@
-ALTER SESSION SET "_ORACLE_SCRIPT" = TRUE;
+-- favorite, followuser, review, reviewtag, reviewtag_REL, ..
 
-DROP USER ynna CASCADE;
+-- Favorite data
 
-CREATE USER ynna IDENTIFIED BY "0000"
-    DEFAULT TABLESPACE USERS
-    TEMPORARY TABLESPACE TEMP
-    QUOTA UNLIMITED ON USERS;
-
-GRANT CONNECT, RESOURCE TO ynna;
-GRANT CREATE SEQUENCE, CREATE TRIGGER, CREATE VIEW TO ynna;
-
-COMMIT;
-
-TRUNCATE TABLE ProductCategory;
-DROP SEQUENCE SEQ_CATEGORY_ID;
-
-DROP TABLE Product CASCADE CONSTRAINTS;
-DROP SEQUENCE SEQ_PRODUCT_ID;
-
-DROP TABLE Ingredient CASCADE CONSTRAINTS;
-DROP SEQUENCE SEQ_INGREDIENT_ID;
-
-DROP TABLE RiskIngredient CASCADE CONSTRAINTS;
-DROP SEQUENCE SEQ_RISKINGREDIENT_ID;
-
-DROP TABLE AllergyIngredient CASCADE CONSTRAINTS;
-DROP SEQUENCE SEQ_ALLERGYINGREDIENT_ID;
-
-TRUNCATE TABLE ProductIngredient_REL;
-TRUNCATE TABLE Product;
-DROP SEQUENCE SEQ_PRODUCT_ID;
+INSERT INTO FAVORITE(user_id, product_id) VALUES('ynna', 1);
+INSERT INTO FAVORITE(user_id, product_id) VALUES('ynna', 2);
+INSERT INTO FAVORITE(user_id, product_id) VALUES('ynna', 3);
+INSERT INTO FAVORITE(user_id, product_id) VALUES('zero', 5);
+INSERT INTO FAVORITE(user_id, product_id) VALUES('zero', 4);
+INSERT INTO FAVORITE(user_id, product_id) VALUES('yeun', 6);
+INSERT INTO FAVORITE(user_id, product_id) VALUES('yeun', 7);
+INSERT INTO FAVORITE(user_id, product_id) VALUES('na0729', 10);
+INSERT INTO FAVORITE(user_id, product_id) VALUES('na0729', 11);
+INSERT INTO FAVORITE(user_id, product_id) VALUES('na0729', 12);
+INSERT INTO FAVORITE(user_id, product_id) VALUES('jangh', 13);
+INSERT INTO FAVORITE(user_id, product_id) VALUES('jangh', 14);
+INSERT INTO FAVORITE(user_id, product_id) VALUES('jangh', 15);
 
 COMMIT;
 
-SELECT COUNT(*) AS row_count
-FROM PRODUCTINGREDIENT_REL;
+
+-- FollowUser data
+INSERT INTO FOLLOWUSER(follower_id, followee_id) VALUES('ddabong', 'jangh');
+INSERT INTO FOLLOWUSER(follower_id, followee_id) VALUES('ynna', 'jangh');
+INSERT INTO FOLLOWUSER(follower_id, followee_id) VALUES('jangh', 'ynna');
+INSERT INTO FOLLOWUSER(follower_id, followee_id) VALUES('yeun', 'ynna');
+INSERT INTO FOLLOWUSER(follower_id, followee_id) VALUES('yeun', 'na0729');
+INSERT INTO FOLLOWUSER(follower_id, followee_id) VALUES('zero', 'ynna');
+INSERT INTO FOLLOWUSER(follower_id, followee_id) VALUES('zero', 'cherrie');
+INSERT INTO FOLLOWUSER(follower_id, followee_id) VALUES('cherrie', 'na0729');
+INSERT INTO FOLLOWUSER(follower_id, followee_id) VALUES('ynna', 'cherrie');
+INSERT INTO FOLLOWUSER(follower_id, followee_id) VALUES('ynna', 'yeun');
+
+COMMIT;
+
+
+-- review
+
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('ynna', 1, 5, 'N', 'Y', '무난하게 사용하기 좋은 장벽 크림(로션) 펌프 형식이라 쓰기 편하고 화잘먹 템으로도 좋아요', TO_DATE('2025-09-01', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('jangh', 16, 3, 'N', 'N', '나이트케어용으로 구매했으나, 복합성 및 건성에게는 여름일 때 조차 가볍게 느껴져 추천하지 않음 ', TO_DATE('2025-09-03', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('zero', 9, 2, 'Y', 'N', '기존에 쿨톤에게 무난히 잘 어울리는 색이며, 베이스로도 좋지만 단독 립으로도 사용하기 좋았으나, 리뉴얼 이후로 기존 색상과 차이 발생. 사용 이후 윗입술에 구순염 및 건조함 발생', TO_DATE('2025-09-05', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('jangh', 15, 5, 'N', 'Y', '갈웜에겐 다 잘어울릴 것 같음 촉촉하게 발림 착색도 처음 색 그대로 착색됨', TO_DATE('2025-09-07', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('ynna', 25, 4, 'N', 'Y', '세정력 좋게 뽀득뽀득 닦이는 느낌 좋아하는 지성에게 추천하는 클렌징폼. 그 이외의 피부타입에게는 건조함이 많이 느껴질듯. 가성비가 좋고 거품이 쫀쫀하게 잘 나서 좋음', TO_DATE('2025-09-09', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('cherrie', 20, 4, 'N', 'Y', '브러쉬가 매우 얇아서 세밀한 라인 그리기 쉬움. 눈물에도 안 지워짐. 가끔 잉크가 터지는 현상이 발생.', TO_DATE('2025-09-11', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('yeun', 11, 2, 'Y', 'N', '어성초 성분이 안 맞는건지 트러블 엄청남. 민감성에게 추천하지 않음.', TO_DATE('2025-09-12', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('yeun', 23, 2, 'Y', 'N', '피부에 화한 느낌이 들고 피곤한 날에는 뒤집어짐. 비추.', TO_DATE('2025-09-14', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('jangh', 14, 4, 'N', 'Y', '세미매트 타입으로 건성이나 복합성은 여름에 바르기 좋음 겨울에도 기초 탄탄히 쌓으면 괜찮고, 예쁘게 무너짐', TO_DATE('2025-09-16', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('cherrie', 36, 5, 'N', 'Y', '피지, 요철 관리에 좋음. 진한 메이크업도 잘 지워지는 세정력. 할인시 가격이 매우 저렴함', TO_DATE('2025-09-18', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('zero', 5, 5, 'N', 'Y', '무난한 장벽크림 / 시카좀 크림은 오전에 화장 전에 쓰기 좋음', TO_DATE('2025-09-21', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('cherrie', 34, 4, 'N', 'Y', '얇고 밀착이 잘 되는 제형. 지속력이 좋고 다크닝이 없음', TO_DATE('2025-09-24', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('ynna', 8, 3, 'Y', 'N', '리뉴얼 후 명도가 살짝 올라갔지만 그래도 가을뮤트가 사용하기 좋은 색감. 하지만 바르면 입술이 땡기는 느낌이 들고 잘 상하는 느낌. 사용후 구순염 발생', TO_DATE('2025-09-27', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('na0729', 13, 4, 'N', 'Y', '너무 웜한 컬러이긴 하지만 음영 화장하기에 자연스러움', TO_DATE('2025-09-30', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('yeun', 25, 3, 'N', 'N', '쓴다고 트러블이 나지는 않지만 속이 버석버석해짐.', TO_DATE('2025-10-02', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('jangh', 24, 5, 'N', 'Y', '정말정말 순하고 부드러우면서도 클렌징은 깔끔하게 됨 세안 후 속당김 건조함도 거의 없음', TO_DATE('2025-10-05', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('cherrie', 18, 5, 'N', 'Y', '장벽 강화에 큰 효과를 봄. 장벽 크림치고 제형이 무겁지 않아 지성이 사용해도 괜찮을 것 같다. 나이트케어로 사용하면 다음 날 피부가 맨들맨들함. 화장 전에 얇게 바르면 베이스 메이크업이 덜 뜸.', TO_DATE('2025-10-07', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('ynna', 35, 4, 'N', 'N', '기존 컬픽스 마스카라들보다 더 볼륨이 있는 타입. 속눈썹이 강조되면 눈이 답답해보이는 타입이어서 재구매는 안할듯. 하지만 제품력은 괜찮아서 컬픽스 마스카라 특유의 발림성, 깔끔함, 지속력이 좋았지만 조금 더 볼륨감있게 연출하고 싶은 사람들에게 추천', TO_DATE('2025-10-10', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('jangh', 31, 2, 'N', 'N', '오일인 상태로 물기 없는 얼굴에 바르자마자 바로 거품으로 변해서 클렌징 오일만의 장점을 크게 느끼지 못함 클렌징 자체의 기능은 괜찮은 것 같으나 사용 후 타 제품에 비해 건조감이 심하게 느껴짐', TO_DATE('2025-10-12', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('ynna', 21, 4, 'N', 'Y', '웜톤이 사용하기 좋은 따뜻한 색의 애쉬 붓펜 아이라이너. 여러 번 그리면 똥이 생기면서 벗겨지는 현상 발생함.', TO_DATE('2025-10-15', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('ynna', 2, 4, 'N', 'Y', '시중에 없는 눌린 분위기 있는 체리색. 여름뮤트-핑크잘받는가을뮤트 사용하기 좋을 거 같음. 약한 플럼핑 성분 때문에 화함이 있음', TO_DATE('2025-10-17', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('ynna', 12, 5, 'N', 'Y', '22~23호 가을뮤트에게는 상당히 베이스처럼 발리고, 개인적으로는 생각보다 쿨하게 올라옴. 하지만 뮤트톤들이 미지근한 핑크 베이스립을 찾는다면 바로 추천할 템! 제형도 얇고 밀착력있고 주름에 잘 끼이지 않는 좋은 매트 제형임', TO_DATE('2025-10-19', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('ynna', 4, 4, 'N', 'Y', '너무 무겁지도 너무 가볍지도 않은 적당한 제형의 장벽크림 찾는 사람들에게 추천. 아침, 저녁으로 발라도 좋고 모든 계절에 사용하기 괜찮고 화장 전에 바르기도 좋음. 겨울에는 복합성 또는 건성에게는 보습력이 부족할 수도 있을듯. 그리고 개인적으로 향이 많이 불호인 점이 많이 아쉬움', TO_DATE('2025-10-22', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('ynna', 16, 3, 'N', 'N', '지성은 봄, 가을에 복합성은 여름에 사용하기 좋은 젤같은 타입의 크림. 하지만 장벽수분진정이라는 이름에도 불구하고 장벽과 진정에는 효과를 별로 보지 못함. 시중에 좋은 수분크림이 워낙 많아서 재구매 생각은 없음', TO_DATE('2025-10-24', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('ynna', 38, 5, 'N', 'Y', '약산성 폼 특유의 미끌거리고 잔여감 남는 느낌이 거의 없어서 매우 좋음', TO_DATE('2025-10-27', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('na0729', 29, 5, 'N', 'Y', '끈적거리지 않는 마무리감에 적당히 수분감 있고 촉촉함 여러번 구매한 기초 제품', TO_DATE('2025-10-29', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('na0729', 12, 5, 'N', 'Y', '각질 부각 없이 산뜻하게 마무리됨 미지근한 색감으로 웜,쿨 모두 사용 가능함 무난히 데일리템으로 쓰기 좋음', TO_DATE('2025-11-01', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('cherrie', 35, 4, 'N', 'Y', '안 뭉치고 안 쳐지는 제형. 인형 속눈썹 연출가능. 아주 살짝 번짐이 있을 수 있음. 클렌징 어려울 수 있음', TO_DATE('2025-11-03', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('ynna', 37, 5, 'N', 'Y', '매우 깔끔한 속눈썹 표현이 가능. 블랙은 너무 진하거나 또렷하고 브라운은 너무 밝은 사람들이 자연스러운 색감으로 사용하기 좋은 마스카라. 지속력도 매우 좋지만 클렌징이 어려움', TO_DATE('2025-11-05', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('yeun', 24, 5, 'N', 'Y', '민감성은 역시 밀크. 유화 잘 해주면 피지도 잘 빠짐.', TO_DATE('2025-11-07', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('na0729', 28, 4, 'N', 'Y', '진정효과에 좋고 트러블 난 곳에 붙이고 있으면 많이 가라앉음 다만 스킨케어할 때 단독으로 쓰기엔 건조함', TO_DATE('2025-11-10', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('zero', 4, 5, 'N', 'Y', '무난한 장벽크림/ 나이트루틴 용으로 쓰기 좋은 크림. 발림성 가볍고 무향. 트러블 올라온 곳이나 모공 신경 쓰이는 곳에 여러 겹 레이어로 바르면 다음 날 매끈피부 마주치기 가능', TO_DATE('2025-11-12', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('yeun', 6, 4, 'N', 'Y', '밀착이 잘되는 세미매트형 쿠션', TO_DATE('2025-11-15', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('yeun', 7, 5, 'N', 'Y', '리얼 공병템 7병째 쓰고있음. 수부지는 세겹정도 레이어하면 아주 좋음.', TO_DATE('2025-11-17', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('yeun', 22, 5, 'N', 'Y', '듬뿍 바르고 자면 다음날 피부가 빤딱빤딱해짐. 민감성이 써도 나쁘지 않은 듯. ', TO_DATE('2025-11-19', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('na0729', 27, 2, 'N', 'N', '블랙헤드와 각질 개선 효과가 미미하며 너무 건조해서 잘 안 쓰게 됨', TO_DATE('2025-11-21', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('ynna', 7, 5, 'N', 'Y', '가볍게 사용하기 좋은 무난한 수분앰플. 매우 묽고 여러번 레이어링하기 좋음. 묽은 사용감에 비해 수분감을 잘 채워줌', TO_DATE('2025-11-23', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('ynna', 19, 5, 'N', 'Y', '가을뮤트가 자기 혈색 같이 사용하기 정말 좋은 블러셔. 가루날림은 조금 있지만 지금까지 사용했던 블러셔 중에 가장 색감이 피부랑 잘 어우러짐.', TO_DATE('2025-11-25', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('jangh', 30, 1, 'Y', 'N', '피부가 둔감한 편임에도 불구하고 팩 사용시 얼굴에 열감이 느껴지고 트러블도 생김 시트도 요즘 나오는 팩에 비해 두꺼웠고 거친 거즈 느낌이 났음', TO_DATE('2025-11-27', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('na0729', 10, 4, 'N', 'Y', '끈적감 없는 마무리가 좋음 화잘먹템', TO_DATE('2025-11-29', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('jangh', 32, 5, 'N', 'Y', '쓰기 시작한 이후로 매일매일 바르고 자는데 그 뒤로 각질이란 걸 찾아볼 수 없음', TO_DATE('2025-12-01', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('zero', 10, 4, 'N', 'Y', '가벼운 제형으로 수부지에게 부담스럽지 않은 제형. 수분 부족하다고 느껴질 때 여러 겹 레이어드 해도 답답하다는 느낌이 들지 않음. 화장 전 파데에 약간 섞어서 피부에 올려주면 피부표현 예쁘게 됨', TO_DATE('2025-12-02', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('cherrie', 33, 2, 'Y', 'N', '패드를 쓰자마자 붉은기와 열감, 화끈거림이 바로 올라와서 더 사용하지 못함', TO_DATE('2025-12-03', 'YYYY-MM-DD'));
+INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text, created_at) VALUES('ynna', 24, 4, 'N', '', '무난한 클렌징밀크. 마스카라까지는 모르겠지만 아이라인까지는 꼼꼼히 클렌징하면 다 지워짐. 하지만 눈에 들어가면 아픈 점이 아쉬움. 다른 클렌징밀크도 써보고 싶어서 재구매 여부는 잘 모르겠음', TO_DATE('2025-12-03', 'YYYY-MM-DD'));
+
+COMMIT;
+
+
+-- ReviewTag
+
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(1, '촉촉해요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(2, '건조해요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(3, '흡수가 잘 돼요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(4, '겉돌아요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(5, '자극이 없어요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(6, '자극이 있어요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(7, '제형이 가벼워요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(8, '제형이 무거워요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(9, '트러블이 나요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(10, '따가워요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(11, '톤에 비해 밝아요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(12, '톤에 딱 맞아요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(13, '톤에 비해 어두워요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(14, '지속력이 좋아요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(15, '지속력이 아쉬워요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(16, '밀착력이 좋아요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(17, '밀착력이 아쉬워요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(18, '다크닝이 있어요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(19, '커버력이 좋아요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(20, '커버력이 아쉬워요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(21, '자연스러워요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(22, '화려해요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(23, '발색이 잘 돼요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(24, '발색이 잘 안 돼요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(25, '향이 좋아요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(26, '향이 안 좋아요');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(27, '건성 추천');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(28, '복합성 추천');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(29, '지성 추천');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(30, '수부지 추천');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(31, '민감성 추천');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(32, '트러블성 추천');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(33, '웜톤 추천');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(34, '쿨톤 추천');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(35, '뉴트럴톤 추천');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(36, '봄 웜톤 추천');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(37, '여름 쿨톤 추천');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(38, '가을 웜톤 추천');
+INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(39, '겨울 쿨톤 추천');
+
+COMMIT;
+
+
+-- ReviewTag_REL
+
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(1, 1);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(1, 5);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(1, 28);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(1, 31);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(2, 7);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(2, 4);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(3, 9);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(3, 21);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(3, 37);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(4, 38);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(4, 14);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(4, 25);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(5, 29);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(6, 14);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(6, 34);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(6, 37);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(7, 6);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(7, 10);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(8, 6);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(8, 9);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(8, 10);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(9, 14);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(9, 16);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(10, 29);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(10, 30);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(11, 1);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(11, 3);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(11, 5);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(11, 7);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(11, 28);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(11, 30);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(12, 14);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(12, 16);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(13, 6);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(13, 9);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(13, 23);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(13, 33);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(13, 38);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(14, 23);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(14, 36);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(14, 38);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(15, 2);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(16, 1);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(16, 7);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(16, 31);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(16, 32);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(17, 1);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(17, 3);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(17, 5);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(17, 28);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(17, 29);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(17, 31);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(18, 14);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(19, 2);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(20, 14);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(20, 33);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(20, 36);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(20, 38);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(21, 35);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(21, 37);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(22, 7);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(22, 16);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(22, 21);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(22, 35);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(22, 37);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(22, 38);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(23, 1);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(23, 3);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(23, 5);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(23, 26);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(23, 28);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(23, 29);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(23, 30);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(23, 31);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(23, 32);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(24, 1);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(24, 3);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(24, 28);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(24, 29);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(25, 5);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(25, 27);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(25, 28);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(25, 31);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(26, 1);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(26, 3);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(26, 5);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(26, 7);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(26, 30);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(26, 31);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(26, 32);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(27, 11);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(27, 15);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(27, 23);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(27, 34);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(27, 36);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(27, 37);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(29, 14);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(29, 33);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(29, 35);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(29, 36);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(29, 38);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(30, 5);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(31, 2);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(31, 5);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(31, 7);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(31, 31);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(31, 32);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(32, 1);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(32, 3);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(32, 5);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(32, 7);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(32, 28);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(32, 30);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(33, 5);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(33, 7);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(33, 12);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(33, 14);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(34, 1);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(34, 3);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(34, 7);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(35, 1);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(35, 5);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(35, 25);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(36, 2);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(36, 4);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(36, 7);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(37, 1);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(37, 3);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(37, 28);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(37, 29);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(37, 30);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(38, 33);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(38, 38);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(39, 2);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(39, 5);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(39, 10);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(40, 1);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(40, 3);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(40, 5);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(40, 7);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(40, 31);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(40, 32);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(41, 1);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(41, 25);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(42, 1);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(42, 3);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(42, 5);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(42, 7);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(42, 28);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(42, 30);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(43, 6);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(43, 10);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(44, 27);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(44, 28);
+INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(44, 31);
+
+COMMIT;
