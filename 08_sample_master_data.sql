@@ -35,7 +35,6 @@ INSERT INTO BRAND(brand_name) VALUES('라운드랩');
 
 COMMIT;
 
-
 -- Category data
 SET DEFINE OFF;
 

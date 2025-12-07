@@ -15,6 +15,7 @@ CREATE TABLE Product (
     category        VARCHAR2(20)    NOT NULL,
     capacity        VARCHAR2(10),
     price           number(10),
+    review_count   NUMBER DEFAULT 0,
 
     CONSTRAINT fk_product_brand
         FOREIGN KEY (brand_id)
@@ -24,3 +25,9 @@ CREATE TABLE Product (
         FOREIGN KEY (category)
         REFERENCES ProductCategory(category_name)
 );
+
+
+
+
+
+

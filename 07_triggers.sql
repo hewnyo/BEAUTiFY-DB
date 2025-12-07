@@ -67,3 +67,4 @@ BEGIN
     :NEW.review_id := SEQ_REVIEW_ID.NEXTVAL;
 END;
 /
+

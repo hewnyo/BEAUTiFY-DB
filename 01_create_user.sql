@@ -8,7 +8,7 @@ CREATE TABLE Users (
     CONSTRAINT chk_users_age CHECK (age BETWEEN 0 AND 120)
 );
 
-CREATE TABLE UserProfile (
+CREATE TABLE UserProfile_BASE (
     user_id         VARCHAR2(10)    PRIMARY KEY,
     gender          char(1),
     tone_no         NUMBER(2),
@@ -37,8 +37,28 @@ CREATE TABLE UserProfile (
         ))
 );
 
+---age_band 뷰 생성
+CREATE OR REPLACE VIEW UserProfile AS
+SELECT
+    u.user_id,
+    up.gender,
+    up.tone_no,
+    up.personal_color,
+    CASE
+        WHEN u.age < 20 THEN '10'
+        WHEN u.age < 30 THEN '20'
+        WHEN u.age < 40 THEN '30'
+        WHEN u.age < 50 THEN '40'
+        WHEN u.age < 60 THEN '50'
+        ELSE '60_PLUS'
+    END AS age_band
+FROM Users u
+JOIN UserProfile_BASE up
+    ON u.user_id = up.user_id;
+
 CREATE TABLE SkinType (
     skin_type_id NUMBER(5) PRIMARY KEY,
     type_name    VARCHAR2(50) UNIQUE NOT NULL
 );
+
 

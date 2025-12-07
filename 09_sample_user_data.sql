@@ -83,7 +83,6 @@ INSERT INTO REVIEW(user_id, product_id, rating, trouble, repurchase, review_text
 
 COMMIT;
 
-
 -- ReviewTag
 
 INSERT INTO REVIEWTAG(tag_id, tag_name) VALUES(1, '촉촉해요');
@@ -288,3 +287,4 @@ INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(44, 28);
 INSERT INTO REVIEWTAG_REL(review_id, tag_id) VALUES(44, 31);
 
 COMMIT;
+

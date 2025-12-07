@@ -137,3 +137,4 @@ CREATE TABLE RecommendationLog (
         FOREIGN KEY (product_id)
         REFERENCES Product (product_id)
 );
+
