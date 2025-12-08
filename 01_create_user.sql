@@ -13,7 +13,6 @@ CREATE TABLE UserProfile_BASE (
     gender          char(1),
     tone_no         NUMBER(2),
     personal_color  VARCHAR2(20),
-    age_band        varchar2(10),
 
     CONSTRAINT fk_user_profile_user
         FOREIGN KEY (user_id)
@@ -29,12 +28,8 @@ CREATE TABLE UserProfile_BASE (
         CHECK(personal_color IN (
             'WARM', 'COOL', 'SPRING_WARM', 'SUMMER_COOL', 'AUTUMN_WARM', 'WINTER_COOL',
             'SPRING_WARM_LIGHT', 'SPRING_WARM_BRIGHT', 'SUMMER_COOL_LIGHT', 'SUMMER_COOL_MUTE', 'AUTUMN_WARM_MUTE', 'AUTUMN_WARM_DEEP', 'WINTER_COOL_BRIGHT', 'WINTER_COOL_DEEP'
-        )),
-    
-    CONSTRAINT chk_user_profile_age_band
-        CHECK(age_band IN (
-            '10', '20', '30', '40', '50', '60_PLUS'
         ))
+
 );
 
 ---age_band 뷰 생성
@@ -43,15 +38,15 @@ SELECT
     u.user_id,
     up.gender,
     up.tone_no,
-    up.personal_color
-
+    up.personal_color,
+    CASE
+        WHEN u.age < 20 THEN '10'
+        WHEN u.age < 30 THEN '20'
+        WHEN u.age < 40 THEN '30'
+        WHEN u.age < 50 THEN '40'
+        WHEN u.age < 60 THEN '50'
+        ELSE '60_PLUS'
+    END AS age_band
 FROM Users u
 JOIN UserProfile_BASE up
     ON u.user_id = up.user_id;
-
-CREATE TABLE SkinType (
-    skin_type_id NUMBER(5) PRIMARY KEY,
-    type_name    VARCHAR2(50) UNIQUE NOT NULL
-);
-
-
