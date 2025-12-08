@@ -124,8 +124,6 @@ CREATE TABLE RecommendationLog (
     rec_id          NUMBER(10)      PRIMARY KEY,
     user_id         VARCHAR2(10)    NOT NULL,
     product_id      NUMBER(5)       NOT NULL,
-    algo_version    VARCHAR2(20),
-    rule_explain    VARCHAR2(400),
     score           NUMBER(5,2),
     created_at      DATE            DEFAULT SYSDATE,
 
