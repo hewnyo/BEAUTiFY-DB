@@ -136,6 +136,7 @@ CREATE TABLE RecommendationLog (
         REFERENCES Product (product_id)
 );
 
+
 CREATE TABLE UserPreference (
     user_id         VARCHAR2(10)    NOT NULL,
     ingr_id         NUMBER(5)       NOT NULL,
@@ -154,3 +155,5 @@ CREATE TABLE UserPreference (
     CONSTRAINT chk_preference_tyoe
         CHECK(preference_type IN ('P', 'A'))
 );
+
+

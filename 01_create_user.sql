@@ -43,15 +43,8 @@ SELECT
     u.user_id,
     up.gender,
     up.tone_no,
-    up.personal_color,
-    CASE
-        WHEN u.age < 20 THEN '10'
-        WHEN u.age < 30 THEN '20'
-        WHEN u.age < 40 THEN '30'
-        WHEN u.age < 50 THEN '40'
-        WHEN u.age < 60 THEN '50'
-        ELSE '60_PLUS'
-    END AS age_band
+    up.personal_color
+
 FROM Users u
 JOIN UserProfile_BASE up
     ON u.user_id = up.user_id;

@@ -30,3 +30,4 @@ CREATE TABLE AllergyIngredient (
         FOREIGN KEY (inci_name)
         REFERENCES Ingredient(inci_name)
 );
+
