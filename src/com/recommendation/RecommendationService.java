@@ -86,6 +86,104 @@ public class RecommendationService {
                 p.getCapacity();
     }
 
+    // 0.0 ~ 1.0 사이 값 리턴
+    private double calcSkinMatch(UserProfile profile, Product p) {
+        Integer userMain = profile.getMainSkinTypeId();
+        Integer userSub  = profile.getSubSkinTypeId();
+        Integer prodMain = p.getMainSkinTypeId();
+        Integer prodSub  = p.getSubSkinTypeId();
+
+        if (prodMain == null && prodSub == null) {
+            // 제품이 피부 정보 안 갖고 있으면 0점
+            return 0.0;
+        }
+
+        double score = 0.0;
+
+        // 메인 피부타입 일치 → 0.7
+        if (userMain != null && prodMain != null && userMain.equals(prodMain)) {
+            score += 0.7;
+        }
+
+        // 서브 피부타입 일치 → +0.3 (최대 1.0 안 넘게)
+        if (userSub != null && prodSub != null && userSub.equals(prodSub)) {
+            score += 0.3;
+        }
+
+        // 혹시 합이 1 넘으면 자르기
+        return Math.min(score, 1.0);
+    }
+
+    private double calcToneMatch(UserProfile profile, Product p) {
+        Integer minTone = p.getMinToneNo();
+        Integer maxTone = p.getMaxToneNo();
+        int userTone = profile.getToneNo();
+
+        if (minTone == null || maxTone == null) {
+            // 제품이 톤 범위 정보를 안 갖고 있으면 0점
+            return 0.0;
+        }
+
+        if (userTone >= minTone && userTone <= maxTone) {
+            // 딱 범위 안 → 최고점
+            return 1.0;
+        }
+
+        // 범위 밖이면 거리 기반 점수 (최대 거리 10 기준 예시)
+        int diff;
+        if (userTone < minTone) {
+            diff = minTone - userTone;
+        } else {
+            diff = userTone - maxTone;
+        }
+
+        double maxDiff = 10.0; // 톤 차이 10 넘으면 0점 처리
+        double score = 1.0 - (diff / maxDiff);
+        if (score < 0.0) score = 0.0;
+
+        return score;
+    }
+
+    private double calcPersonalColorMatch(UserProfile profile, Product p) {
+        String userColor = profile.getPersonalColor();
+        String prodColor = p.getForPersonalColor();
+
+        if (prodColor == null || userColor == null) {
+            // 제한 없거나 정보 없으면 0 (혹은 0.3 정도 기본점수 줘도 됨)
+            return 0.0;
+        }
+
+        if (prodColor.equalsIgnoreCase(userColor)) {
+            return 1.0;
+        }
+
+        // 같은 계절 계열인지 간단 체크 (SPRING_WARM, SPRING_LIGHT 이런 네이밍 가정)
+        String userSeason  = extractSeason(userColor); // SPRING / SUMMER / AUTUMN / WINTER
+        String prodSeason  = extractSeason(prodColor);
+
+        if (userSeason != null && userSeason.equals(prodSeason)) {
+            return 0.6;
+        }
+
+        return 0.0;
+    }
+
+    // "SPRING_WARM" -> "SPRING" 같은 식으로 시즌만 뽑아내기
+    private String extractSeason(String personalColor) {
+        if (personalColor == null) return null;
+        personalColor = personalColor.toUpperCase();
+
+        if (personalColor.startsWith("SPRING")) return "SPRING";
+        if (personalColor.startsWith("SUMMER")) return "SUMMER";
+        if (personalColor.startsWith("AUTUMN") || personalColor.startsWith("FALL")) return "AUTUMN";
+        if (personalColor.startsWith("WINTER")) return "WINTER";
+
+        return null;
+    }
+
+
+
+
     /**
      * 점수 계산 로직 (간단 버전)
      *  - 인기 점수: log(review_count + 1)
@@ -93,20 +191,29 @@ public class RecommendationService {
      */
     private double calculateScore(UserProfile profile, Product p) {
         // 1) 인기 점수 (리뷰 수 기반)
-        double popularityScore = Math.log(p.getReviewCount() + 1); // 리뷰 0 → 0, 1 → ~0.69 ...
+        double popularityScore = Math.log(p.getReviewCount() + 1);
 
         // 2) 나이대별 가격 민감도
         double priceWeight = getPriceWeightByAgeBand(profile.getAgeBand());
-
-        // 3) 가격 정규화 (0 ~ 200,000원 구간을 0~1로 매핑)
         double normalizedPrice = normalizePrice(p.getPrice());
-
-        // 가격이 저렴할수록 점수 ↑
         double priceScore = (1.0 - normalizedPrice) * priceWeight;
 
-        // (필요하면 여기 스킨타입/톤/퍼컬 기반 가중치도 추가 가능)
-        return popularityScore + priceScore;
+        // 3) 피부/톤/퍼컬 매칭 점수
+        double skinScore  = calcSkinMatch(profile, p);         // 0 ~ 1
+        double toneScore  = calcToneMatch(profile, p);         // 0 ~ 1
+        double colorScore = calcPersonalColorMatch(profile, p);// 0 ~ 1
+
+        // 4) 가중치 설정
+        double wSkin  = 1.5;   // 피부타입 매칭을 제일 중요하게
+        double wTone  = 1.0;
+        double wColor = 0.8;
+
+        return popularityScore + priceScore
+                + wSkin  * skinScore
+                + wTone  * toneScore
+                + wColor * colorScore;
     }
+
 
     /**
      * 나이대별 가격 민감도 가중치
