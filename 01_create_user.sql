@@ -32,6 +32,11 @@ CREATE TABLE UserProfile_BASE (
 
 );
 
+CREATE TABLE SkinType (
+    skin_type_id NUMBER(5) PRIMARY KEY,
+    type_name    VARCHAR2(50) UNIQUE NOT NULL
+);
+
 ---age_band 뷰 생성
 CREATE OR REPLACE VIEW UserProfile AS
 SELECT

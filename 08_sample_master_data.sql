@@ -2084,26 +2084,3 @@ INSERT INTO PRODUCTINGREDIENT_REL(product_id, ingr_id) VALUES(40,560);
 
 COMMIT;
 
-
--- UserPreference data
-
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('ynna', 139, 'P');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('ynna', 236, 'P');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('ynna', 116, 'A');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('ynna', 54, 'A');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('zero', 236, 'P');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('zero', 139, 'P');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('zero', 256, 'P');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('zero', 116, 'A');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('zero', 54, 'A');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('yeun', 256, 'P');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('yeun', 146, 'P');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('yeun', 54, 'A');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('na0729', 256, 'P');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('na0729', 54, 'A');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('jangh', 256, 'P');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('jangh', 146, 'P');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('cherrie', 146, 'P');
-INSERT INTO USERPREFERENCE(user_id, ingr_id, preference_type) VALUES('cherrie', 529, 'A');
-
-COMMIT;
