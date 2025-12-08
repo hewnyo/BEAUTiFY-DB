@@ -8,7 +8,7 @@ CREATE TABLE UserSkinType_REL (
 
     CONSTRAINT fk_user_skin_type_user
         FOREIGN KEY (user_id)
-        REFERENCES Users(user_id),
+        REFERENCES UserProfile_BASE(user_id),
 
     CONSTRAINT fk_user_skin_type_master
         FOREIGN KEY (skin_type_id)
@@ -136,3 +136,21 @@ CREATE TABLE RecommendationLog (
         REFERENCES Product (product_id)
 );
 
+CREATE TABLE UserPreference (
+    user_id         VARCHAR2(10)    NOT NULL,
+    ingr_id         NUMBER(5)       NOT NULL,
+    preference_type CHAR(1)         NOT NULL,
+
+    CONSTRAINT pk_user_preference PRIMARY KEY (user_id, ingr_id),
+
+    CONSTRAINT fk_user_preference_userid
+        FOREIGN KEY (user_id)
+        REFERENCES Users(user_id),
+
+    CONSTRAINT fk_user_preference_ingrid
+        FOREIGN KEY (ingr_id)
+        REFERENCES Ingredient(ingr_id),
+
+    CONSTRAINT chk_preference_tyoe
+        CHECK(preference_type IN ('P', 'A'))
+);
