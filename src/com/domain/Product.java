@@ -3,22 +3,22 @@ package com.domain;
 public class Product {
 
     // 기존 필드
-    private int productId;
-    private int brandId;
-    private String brandName;
-    private String productName;
-    private String category;
-    private String capacity;
-    private long price;
-    private int reviewCount;
+    private final int productId;
+    private final int brandId;
+    private final String brandName;
+    private final String productName;
+    private final String category;
+    private final String capacity;
+    private final long price;
+    private final int reviewCount;
 
     // 🔥 추가 필드: 스킨타입, 톤, 퍼스널 컬러 기반 추천용
     // 지금은 DB에 없어도 되니까 null 가능하게 Integer / String 으로 둠
-    private Integer mainSkinTypeId;    // 이 제품의 주 타겟 피부타입
-    private Integer subSkinTypeId;     // 이 제품의 서브 피부타입(선택)
-    private Integer minToneNo;         // 권장 최소 톤 번호
-    private Integer maxToneNo;         // 권장 최대 톤 번호
-    private String forPersonalColor;   // 권장 퍼스널 컬러 (SPRING_WARM 등)
+    private final Integer mainSkinTypeId;    // 이 제품의 주 타겟 피부타입
+    private final Integer subSkinTypeId;     // 이 제품의 서브 피부타입(선택)
+    private final Integer minToneNo;         // 권장 최소 톤 번호
+    private final Integer maxToneNo;         // 권장 최대 톤 번호
+    private final String forPersonalColor;   // 권장 퍼스널 컬러 (SPRING_WARM 등)
 
     // ---- 생성자들 ----
 

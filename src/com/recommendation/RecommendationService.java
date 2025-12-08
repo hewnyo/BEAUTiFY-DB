@@ -3,6 +3,7 @@ package com.recommendation;
 import com.domain.Product;
 import com.domain.UserProfile;
 import com.repository.ProductRepository;
+import com.repository.SocialRepository;
 import com.repository.UserProfileRepository;
 
 import java.util.*;
@@ -14,19 +15,18 @@ public class RecommendationService {
 
     private final UserProfileRepository userProfileRepository;
     private final ProductRepository productRepository;
+    private final SocialRepository socialRepository;
 
     public RecommendationService(UserProfileRepository userProfileRepository,
-                                 ProductRepository productRepository) {
+                                 ProductRepository productRepository,
+                                 SocialRepository socialRepository) {
         this.userProfileRepository = userProfileRepository;
         this.productRepository = productRepository;
+        this.socialRepository = socialRepository;
     }
 
     /**
      * 특정 userId에 대한 상위 N개 추천
-     *
-     * @param userId         추천 대상 사용자
-     * @param topN           상위 몇 개까지 뽑을지
-     * @param categoryFilter null 이 아니면 해당 카테고리만 (예: "eyeliner")
      */
     public List<ProductScore> recommendForUser(String userId, int topN, String categoryFilter) {
         // 1) 유저 프로필 조회
@@ -43,30 +43,30 @@ public class RecommendationService {
             products = productRepository.findByCategory(categoryFilter);
         }
 
-        // 3) "브랜드+이름+카테고리+용량" 기준으로 dedupe 하면서 점수 계산
+        // 3) 소셜 정보 조회
+        Map<Integer, List<String>> socialFavUsers =
+                socialRepository.getFollowedFavoriteUsers(userId);
+
+        // 4) key 기준 dedupe + 점수 계산
         Map<String, ProductScore> scoreMap = new HashMap<>();
 
         for (Product p : products) {
-            double score = calculateScore(profile, p);
-            String explanation = buildExplanation(profile, p, score);
+            double score = calculateScore(profile, p, socialFavUsers);
+            String explanation = buildExplanation(profile, p, score, socialFavUsers);
 
             ProductScore newScore = new ProductScore(p, score, explanation);
-
-            // 화면에서 같은 제품처럼 보이는 것을 하나로 묶기 위한 key
             String key = buildProductKey(p);
 
             ProductScore existing = scoreMap.get(key);
-            // 이미 같은 key가 있으면, 더 높은 점수만 남긴다
             if (existing == null || newScore.getScore() > existing.getScore()) {
                 scoreMap.put(key, newScore);
             }
         }
 
-        // 4) Map → List로 변환 후 정렬 (점수 내림차순)
+        // 5) 정렬 + topN 자르기
         List<ProductScore> scored = new ArrayList<>(scoreMap.values());
         Collections.sort(scored); // ProductScore가 Comparable 구현 (score 내림차순)
 
-        // 5) 상위 topN개만 반환 (고유 제품 기준)
         if (scored.size() > topN) {
             return new ArrayList<>(scored.subList(0, topN));
         } else {
@@ -74,11 +74,7 @@ public class RecommendationService {
         }
     }
 
-    /**
-     * 동일 제품을 식별하기 위한 key 생성
-     *  - 브랜드명 + 제품명 + 카테고리 + 용량
-     *  → 이 조합이 같으면 같은 제품으로 간주하고 중복 제거
-     */
+    /** 동일 제품을 식별하기 위한 key */
     private String buildProductKey(Product p) {
         return p.getBrandName() + "|" +
                 p.getProductName() + "|" +
@@ -86,7 +82,65 @@ public class RecommendationService {
                 p.getCapacity();
     }
 
-    // 0.0 ~ 1.0 사이 값 리턴
+    /** 점수 계산: 인기 + 가격 + 스킨 + 톤 + 퍼컬 + 소셜 */
+    private double calculateScore(UserProfile profile,
+                                  Product p,
+                                  Map<Integer, List<String>> socialFavUsers) {
+
+        // 1) 인기 점수
+        double popularityScore = Math.log(p.getReviewCount() + 1);
+
+        // 2) 가격 점수
+        double priceWeight = getPriceWeightByAgeBand(profile.getAgeBand());
+        double normalizedPrice = normalizePrice(p.getPrice());
+        double priceScore = (1.0 - normalizedPrice) * priceWeight;
+
+        // 3) 스킨 / 톤 / 퍼컬
+        double skinScore  = calcSkinMatch(profile, p);
+        double toneScore  = calcToneMatch(profile, p);
+        double colorScore = calcPersonalColorMatch(profile, p);
+
+        // 4) 소셜 즐겨찾기 점수
+        List<String> fans = socialFavUsers.getOrDefault(
+                p.getProductId(),
+                Collections.emptyList()
+        );
+        int favCnt = fans.size();
+        double socialScore = Math.log(favCnt + 1); // 0→0, 1→0.69, 2→1.10...
+
+        // 5) 가중치
+        double wSkin   = 1.5;
+        double wTone   = 1.0;
+        double wColor  = 0.8;
+        double wSocial = 1.2;
+
+        return popularityScore + priceScore
+                + wSkin   * skinScore
+                + wTone   * toneScore
+                + wColor  * colorScore
+                + wSocial * socialScore;
+    }
+
+
+    private double getPriceWeightByAgeBand(String ageBand) {
+        if ("10".equals(ageBand) || "20".equals(ageBand)) {
+            return 0.8;
+        } else if ("30".equals(ageBand)) {
+            return 0.5;
+        } else {
+            return 0.3;
+        }
+    }
+
+    private double normalizePrice(long price) {
+        double max = 200_000.0;
+        double v = price / max;
+        if (v < 0) v = 0;
+        if (v > 1) v = 1;
+        return v;
+    }
+
+    /** 피부 타입 매칭 점수 (0.0 ~ 1.0) */
     private double calcSkinMatch(UserProfile profile, Product p) {
         Integer userMain = profile.getMainSkinTypeId();
         Integer userSub  = profile.getSubSkinTypeId();
@@ -94,42 +148,35 @@ public class RecommendationService {
         Integer prodSub  = p.getSubSkinTypeId();
 
         if (prodMain == null && prodSub == null) {
-            // 제품이 피부 정보 안 갖고 있으면 0점
             return 0.0;
         }
 
         double score = 0.0;
 
-        // 메인 피부타입 일치 → 0.7
         if (userMain != null && prodMain != null && userMain.equals(prodMain)) {
             score += 0.7;
         }
-
-        // 서브 피부타입 일치 → +0.3 (최대 1.0 안 넘게)
         if (userSub != null && prodSub != null && userSub.equals(prodSub)) {
             score += 0.3;
         }
 
-        // 혹시 합이 1 넘으면 자르기
         return Math.min(score, 1.0);
     }
 
+    /** 톤 번호 매칭 점수 (0.0 ~ 1.0) */
     private double calcToneMatch(UserProfile profile, Product p) {
         Integer minTone = p.getMinToneNo();
         Integer maxTone = p.getMaxToneNo();
         int userTone = profile.getToneNo();
 
         if (minTone == null || maxTone == null) {
-            // 제품이 톤 범위 정보를 안 갖고 있으면 0점
             return 0.0;
         }
 
         if (userTone >= minTone && userTone <= maxTone) {
-            // 딱 범위 안 → 최고점
             return 1.0;
         }
 
-        // 범위 밖이면 거리 기반 점수 (최대 거리 10 기준 예시)
         int diff;
         if (userTone < minTone) {
             diff = minTone - userTone;
@@ -137,19 +184,19 @@ public class RecommendationService {
             diff = userTone - maxTone;
         }
 
-        double maxDiff = 10.0; // 톤 차이 10 넘으면 0점 처리
+        double maxDiff = 10.0;
         double score = 1.0 - (diff / maxDiff);
         if (score < 0.0) score = 0.0;
 
         return score;
     }
 
+    /** 퍼스널 컬러 매칭 점수 (0.0 ~ 1.0) */
     private double calcPersonalColorMatch(UserProfile profile, Product p) {
         String userColor = profile.getPersonalColor();
         String prodColor = p.getForPersonalColor();
 
         if (prodColor == null || userColor == null) {
-            // 제한 없거나 정보 없으면 0 (혹은 0.3 정도 기본점수 줘도 됨)
             return 0.0;
         }
 
@@ -157,9 +204,8 @@ public class RecommendationService {
             return 1.0;
         }
 
-        // 같은 계절 계열인지 간단 체크 (SPRING_WARM, SPRING_LIGHT 이런 네이밍 가정)
-        String userSeason  = extractSeason(userColor); // SPRING / SUMMER / AUTUMN / WINTER
-        String prodSeason  = extractSeason(prodColor);
+        String userSeason = extractSeason(userColor);
+        String prodSeason = extractSeason(prodColor);
 
         if (userSeason != null && userSeason.equals(prodSeason)) {
             return 0.6;
@@ -168,7 +214,7 @@ public class RecommendationService {
         return 0.0;
     }
 
-    // "SPRING_WARM" -> "SPRING" 같은 식으로 시즌만 뽑아내기
+    /** "SPRING_WARM" -> "SPRING" */
     private String extractSeason(String personalColor) {
         if (personalColor == null) return null;
         personalColor = personalColor.toUpperCase();
@@ -181,83 +227,44 @@ public class RecommendationService {
         return null;
     }
 
+    /** 설명 문구 생성 */
+    private String buildExplanation(UserProfile profile,
+                                    Product p,
+                                    double score,
+                                    Map<Integer, List<String>> socialFavUsers) {
 
-
-
-    /**
-     * 점수 계산 로직 (간단 버전)
-     *  - 인기 점수: log(review_count + 1)
-     *  - 가격 점수: 나이대에 따른 가격 민감도(가중치)를 곱한 뒤, 저렴할수록 높게
-     */
-    private double calculateScore(UserProfile profile, Product p) {
-        // 1) 인기 점수 (리뷰 수 기반)
-        double popularityScore = Math.log(p.getReviewCount() + 1);
-
-        // 2) 나이대별 가격 민감도
-        double priceWeight = getPriceWeightByAgeBand(profile.getAgeBand());
-        double normalizedPrice = normalizePrice(p.getPrice());
-        double priceScore = (1.0 - normalizedPrice) * priceWeight;
-
-        // 3) 피부/톤/퍼컬 매칭 점수
-        double skinScore  = calcSkinMatch(profile, p);         // 0 ~ 1
-        double toneScore  = calcToneMatch(profile, p);         // 0 ~ 1
-        double colorScore = calcPersonalColorMatch(profile, p);// 0 ~ 1
-
-        // 4) 가중치 설정
-        double wSkin  = 1.5;   // 피부타입 매칭을 제일 중요하게
-        double wTone  = 1.0;
-        double wColor = 0.8;
-
-        return popularityScore + priceScore
-                + wSkin  * skinScore
-                + wTone  * toneScore
-                + wColor * colorScore;
-    }
-
-
-    /**
-     * 나이대별 가격 민감도 가중치
-     *  - "10" / "20" : 0.8
-     *  - "30"       : 0.5
-     *  - 그 외      : 0.3
-     */
-    private double getPriceWeightByAgeBand(String ageBand) {
-        if ("10".equals(ageBand) || "20".equals(ageBand)) {
-            return 0.8;
-        } else if ("30".equals(ageBand)) {
-            return 0.5;
-        } else {
-            return 0.3;
-        }
-    }
-
-    /**
-     * 가격 정규화 (0 ~ 200,000원 구간을 0~1로 매핑)
-     *  - 0원       → 0.0
-     *  - 200,000원 → 1.0 (이상은 전부 1.0)
-     */
-    private double normalizePrice(long price) {
-        double max = 200_000.0;
-        double v = price / max;
-        if (v < 0) v = 0;
-        if (v > 1) v = 1;
-        return v;
-    }
-
-    /**
-     * 설명 문구 생성
-     * - 왜 이 점수가 나왔는지 간단히 써주는 용도
-     */
-    private String buildExplanation(UserProfile profile, Product p, double score) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("인기 점수 & 가격을 함께 고려한 추천입니다. ");
-        sb.append("사용자 나이대: ").append(profile.getAgeBand()).append("대, ");
-        sb.append("상품 카테고리: ").append(p.getCategory()).append(", ");
-        sb.append("리뷰 수: ").append(p.getReviewCount()).append("개, ");
-        sb.append("가격: ").append(p.getPrice()).append("원. ");
-        sb.append("최종 점수: ").append(String.format("%.2f", score));
+        List<String> fans = socialFavUsers.getOrDefault(
+                p.getProductId(),
+                Collections.emptyList()
+        );
+        int favCnt = fans.size();
+
+        sb.append("인기, 가격, 피부/톤/퍼스널컬러, 소셜 정보를 함께 고려한 추천입니다.\n");
+
+        sb.append("- 사용자 나이대: ").append(profile.getAgeBand()).append("대\n");
+        sb.append("- 상품 카테고리: ").append(p.getCategory()).append("\n");
+        sb.append("- 리뷰 수: ").append(p.getReviewCount()).append("개\n");
+        sb.append("- 가격: ").append(p.getPrice()).append("원\n");
+
+        // 🔥 소셜 정보 (있는 경우만)
+        if (favCnt > 0) {
+            sb.append("- 팔로우 중 즐겨찾기: ");
+
+            if (favCnt <= 3) {
+                sb.append(String.join(", ", fans)).append("\n");
+            } else {
+                List<String> firstThree = fans.subList(0, 3);
+                int others = favCnt - 3;
+                sb.append(String.join(", ", firstThree))
+                        .append(" 외 ").append(others).append("명\n");
+            }
+        }
+
+        sb.append("- 최종 점수: ").append(String.format("%.2f", score)).append("\n");
 
         return sb.toString();
     }
+
 }

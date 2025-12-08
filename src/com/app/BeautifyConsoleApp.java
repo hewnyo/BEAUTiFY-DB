@@ -4,6 +4,7 @@ import com.domain.UserProfile;
 import com.recommendation.ProductScore;
 import com.recommendation.RecommendationService;
 import com.repository.ProductRepository;
+import com.repository.SocialRepository;
 import com.repository.UserProfileRepository;
 
 import java.util.List;
@@ -17,8 +18,13 @@ public class BeautifyConsoleApp {
 
         UserProfileRepository userProfileRepository = new UserProfileRepository();
         ProductRepository productRepository = new ProductRepository();
+        SocialRepository socialRepository = new SocialRepository();
+
+        // 🔥 RecommendationService 생성자에 3개 인자 넘기는 버전
         RecommendationService recommendationService =
-                new RecommendationService(userProfileRepository, productRepository);
+                new RecommendationService(userProfileRepository,
+                        productRepository,
+                        socialRepository);
 
         System.out.println("===============================================");
         System.out.println("         BEAUTiFY 스마트 추천 콘솔 프로그램");
@@ -26,7 +32,6 @@ public class BeautifyConsoleApp {
         System.out.print("사용자 ID를 입력하세요: ");
         String userId = scanner.nextLine().trim();
 
-        // 먼저 사용자 프로필 출력 (확인용)
         UserProfile profile = userProfileRepository.findByUserId(userId);
         if (profile == null) {
             System.out.println("❌ 해당 사용자 ID의 프로필을 찾을 수 없습니다.");
@@ -42,12 +47,10 @@ public class BeautifyConsoleApp {
         System.out.println(" - 퍼스널컬러    : " + profile.getPersonalColor());
         System.out.println("-----------------------------------------------");
 
-        // 카테고리 선택
         System.out.print("특정 카테고리만 추천 받고 싶으면 입력하세요 (예: eyeliner). 없으면 Enter: ");
         String category = scanner.nextLine().trim();
         if (category.isBlank()) category = null;
 
-        // 추천 수 입력 받기
         System.out.print("추천받을 제품 개수를 입력하세요 (기본값 5): ");
         String countStr = scanner.nextLine().trim();
         int topN = 5;
@@ -82,10 +85,8 @@ public class BeautifyConsoleApp {
                 System.out.println("    가격     : " + ps.getProduct().getPrice() + "원");
                 System.out.println("    리뷰 수  : " + ps.getProduct().getReviewCount());
 
-                // 추천 설명
                 System.out.println("    🔍 추천 이유:");
                 System.out.println("       " + ps.getExplanation());
-
                 System.out.println();
             }
 
