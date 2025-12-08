@@ -3,9 +3,7 @@ package com.app;
 import com.domain.UserProfile;
 import com.recommendation.ProductScore;
 import com.recommendation.RecommendationService;
-import com.repository.ProductRepository;
-import com.repository.SocialRepository;
-import com.repository.UserProfileRepository;
+import com.repository.*;
 
 import java.util.List;
 import java.util.Scanner;
@@ -19,12 +17,21 @@ public class BeautifyConsoleApp {
         UserProfileRepository userProfileRepository = new UserProfileRepository();
         ProductRepository productRepository = new ProductRepository();
         SocialRepository socialRepository = new SocialRepository();
+        RecommendationLogRepository logRepository = new RecommendationLogRepository();
+        UserPreferenceRepository userPreferenceRepository=new UserPreferenceRepository();
+        ProductIngredientRepository productIngredientRepository=new ProductIngredientRepository();
 
-        // 🔥 RecommendationService 생성자에 3개 인자 넘기는 버전
+        // 🔥 RecommendationService 생성자 (4개 인자)
         RecommendationService recommendationService =
-                new RecommendationService(userProfileRepository,
-                        productRepository,
-                        socialRepository);
+                new RecommendationService(
+                        new UserProfileRepository(),
+                        new ProductRepository(),
+                        new SocialRepository(),
+                        new RecommendationLogRepository(),
+                        new UserPreferenceRepository(),
+                        new ProductIngredientRepository()
+                );
+
 
         System.out.println("===============================================");
         System.out.println("         BEAUTiFY 스마트 추천 콘솔 프로그램");
@@ -34,7 +41,7 @@ public class BeautifyConsoleApp {
 
         UserProfile profile = userProfileRepository.findByUserId(userId);
         if (profile == null) {
-            System.out.println("❌ 해당 사용자 ID의 프로필을 찾을 수 없습니다.");
+            System.out.println(" 해당 사용자 ID의 프로필을 찾을 수 없습니다.");
             return;
         }
 
@@ -67,27 +74,27 @@ public class BeautifyConsoleApp {
                     recommendationService.recommendForUser(userId, topN, category);
 
             System.out.println("===============================================");
-            System.out.println("        🎯 추천 결과 (상위 " + recommendations.size() + "개)");
+            System.out.println("         추천 결과 (상위 " + recommendations.size() + "개)");
             System.out.println("===============================================\n");
 
             if (recommendations.isEmpty()) {
                 System.out.println("추천할 제품이 없습니다.");
-                return;
-            }
+            } else {
+                int rank = 1;
+                for (ProductScore ps : recommendations) {
+                    System.out.println("[" + rank++ + "] "
+                            + ps.getProduct().getBrandName() + " - "
+                            + ps.getProduct().getProductName());
 
-            int rank = 1;
-            for (ProductScore ps : recommendations) {
+                    System.out.println("    카테고리 : " + ps.getProduct().getCategory());
+                    System.out.println("    용량     : " + ps.getProduct().getCapacity());
+                    System.out.println("    가격     : " + ps.getProduct().getPrice() + "원");
+                    System.out.println("    리뷰 수  : " + ps.getProduct().getReviewCount());
 
-                System.out.println("[" + rank++ + "] " + ps.getProduct().getBrandName() +
-                        " - " + ps.getProduct().getProductName());
-                System.out.println("    카테고리 : " + ps.getProduct().getCategory());
-                System.out.println("    용량     : " + ps.getProduct().getCapacity());
-                System.out.println("    가격     : " + ps.getProduct().getPrice() + "원");
-                System.out.println("    리뷰 수  : " + ps.getProduct().getReviewCount());
-
-                System.out.println("    🔍 추천 이유:");
-                System.out.println("       " + ps.getExplanation());
-                System.out.println();
+                    System.out.println("     추천 이유:");
+                    System.out.println("       " + ps.getExplanation().replace("\n", "\n       "));
+                    System.out.println();
+                }
             }
 
         } catch (Exception e) {
@@ -96,7 +103,7 @@ public class BeautifyConsoleApp {
         }
 
         System.out.println("===============================================");
-        System.out.println("      BEAUTiFY 추천 프로그램을 종료합니다.");
+        System.out.println("   BEAUTiFY 추천 프로그램을 종료합니다.");
         System.out.println("===============================================");
     }
 }
