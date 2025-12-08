@@ -9,9 +9,6 @@ import java.util.*;
 
 /**
  * BEAUTiFY 콘솔 추천 서비스
- * - userId 기준으로 프로필을 조회하고
- * - Product 목록을 가져와서
- * - 점수 계산 + 정렬 + product_id 기준 dedupe 후 상위 N개 반환
  */
 public class RecommendationService {
 
@@ -27,8 +24,8 @@ public class RecommendationService {
     /**
      * 특정 userId에 대한 상위 N개 추천
      *
-     * @param userId        추천 대상 사용자
-     * @param topN          상위 몇 개까지 뽑을지
+     * @param userId         추천 대상 사용자
+     * @param topN           상위 몇 개까지 뽑을지
      * @param categoryFilter null 이 아니면 해당 카테고리만 (예: "eyeliner")
      */
     public List<ProductScore> recommendForUser(String userId, int topN, String categoryFilter) {
@@ -46,28 +43,30 @@ public class RecommendationService {
             products = productRepository.findByCategory(categoryFilter);
         }
 
-        // 3) product_id 기준으로 dedupe 하면서 점수 계산
-        Map<Integer, ProductScore> scoreMap = new HashMap<>();
+        // 3) "브랜드+이름+카테고리+용량" 기준으로 dedupe 하면서 점수 계산
+        Map<String, ProductScore> scoreMap = new HashMap<>();
 
         for (Product p : products) {
             double score = calculateScore(profile, p);
             String explanation = buildExplanation(profile, p, score);
 
             ProductScore newScore = new ProductScore(p, score, explanation);
-            int productId = p.getProductId();
 
-            // 같은 product_id가 여러 번 들어온 경우, 더 높은 점수만 유지
-            ProductScore existing = scoreMap.get(productId);
+            // 화면에서 같은 제품처럼 보이는 것을 하나로 묶기 위한 key
+            String key = buildProductKey(p);
+
+            ProductScore existing = scoreMap.get(key);
+            // 이미 같은 key가 있으면, 더 높은 점수만 남긴다
             if (existing == null || newScore.getScore() > existing.getScore()) {
-                scoreMap.put(productId, newScore);
+                scoreMap.put(key, newScore);
             }
         }
 
-        // 4) Map → List로 변환 후 정렬
+        // 4) Map → List로 변환 후 정렬 (점수 내림차순)
         List<ProductScore> scored = new ArrayList<>(scoreMap.values());
-        Collections.sort(scored); // ProductScore가 Comparable 구현(점수 내림차순)
+        Collections.sort(scored); // ProductScore가 Comparable 구현 (score 내림차순)
 
-        // 5) 상위 topN개만 반환
+        // 5) 상위 topN개만 반환 (고유 제품 기준)
         if (scored.size() > topN) {
             return new ArrayList<>(scored.subList(0, topN));
         } else {
@@ -76,24 +75,36 @@ public class RecommendationService {
     }
 
     /**
-     * 점수 계산 로직 (간단한 버전)
+     * 동일 제품을 식별하기 위한 key 생성
+     *  - 브랜드명 + 제품명 + 카테고리 + 용량
+     *  → 이 조합이 같으면 같은 제품으로 간주하고 중복 제거
+     */
+    private String buildProductKey(Product p) {
+        return p.getBrandName() + "|" +
+                p.getProductName() + "|" +
+                p.getCategory() + "|" +
+                p.getCapacity();
+    }
+
+    /**
+     * 점수 계산 로직 (간단 버전)
      *  - 인기 점수: log(review_count + 1)
      *  - 가격 점수: 나이대에 따른 가격 민감도(가중치)를 곱한 뒤, 저렴할수록 높게
      */
     private double calculateScore(UserProfile profile, Product p) {
         // 1) 인기 점수 (리뷰 수 기반)
-        double popularityScore = Math.log(p.getReviewCount() + 1); // 리뷰 0 → 0, 1 → ~0.69, 10 → ~2.4 ...
+        double popularityScore = Math.log(p.getReviewCount() + 1); // 리뷰 0 → 0, 1 → ~0.69 ...
 
-        // 2) 나이대에 따른 가격 민감도
+        // 2) 나이대별 가격 민감도
         double priceWeight = getPriceWeightByAgeBand(profile.getAgeBand());
 
-        // 3) 가격 정규화 (0~200000 사이로 가정, 비율을 0~1로)
+        // 3) 가격 정규화 (0 ~ 200,000원 구간을 0~1로 매핑)
         double normalizedPrice = normalizePrice(p.getPrice());
 
         // 가격이 저렴할수록 점수 ↑
         double priceScore = (1.0 - normalizedPrice) * priceWeight;
 
-        // 필요하면 여기다가 스킨타입/톤/퍼컬 등 추가 가중치도 더할 수 있음
+        // (필요하면 여기 스킨타입/톤/퍼컬 기반 가중치도 추가 가능)
         return popularityScore + priceScore;
     }
 
@@ -115,8 +126,8 @@ public class RecommendationService {
 
     /**
      * 가격 정규화 (0 ~ 200,000원 구간을 0~1로 매핑)
-     *  - 0원  → 0.0
-     *  - 200,000원 이상 → 1.0
+     *  - 0원       → 0.0
+     *  - 200,000원 → 1.0 (이상은 전부 1.0)
      */
     private double normalizePrice(long price) {
         double max = 200_000.0;
@@ -128,7 +139,7 @@ public class RecommendationService {
 
     /**
      * 설명 문구 생성
-     * - 리포트/로그용: 왜 이 제품이 이 점수를 받았는지 간단하게 서술
+     * - 왜 이 점수가 나왔는지 간단히 써주는 용도
      */
     private String buildExplanation(UserProfile profile, Product p, double score) {
         StringBuilder sb = new StringBuilder();
